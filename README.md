@@ -1,6 +1,8 @@
 # CSCI596-Final-Project
 
-Team members: Jiayi Liu, Hanyu Zheng
+# Team members:
+
+Jiayi Liu, Hanyu Zheng
 
 # GPU-Accelerated MapReduce Performance Analysis
 
