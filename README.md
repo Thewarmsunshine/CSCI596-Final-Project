@@ -20,6 +20,8 @@ This project aims to analyze and compare the performance of MapReduce tasks exec
 
 - **MapReduce Framework**: The core technology for processing large-scale data.
 - **GPU Acceleration**: Leveraging GPU power to enhance processing speed.
+- **Programming Languages & Libraries**: Cuda.
+
 
 ## Current Progress
 
