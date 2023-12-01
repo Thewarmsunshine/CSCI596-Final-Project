@@ -23,8 +23,8 @@ This project aims to analyze and compare the performance of MapReduce tasks exec
 
 ## Current Progress
 
-- Successfully implemented and executed MapReduce tasks on a GPU.
-  <img width="259" alt="image" src="https://github.com/Thewarmsunshine/CSCI596-Final-Project/assets/56602568/736a45f1-4cff-4c49-b02d-2b57d6576caa">
+- Successfully implemented and executed MapReduce tasks on a GPU (Discovery).  
+<img width="259" alt="image" src="https://github.com/Thewarmsunshine/CSCI596-Final-Project/assets/56602568/736a45f1-4cff-4c49-b02d-2b57d6576caa">
 - Initial benchmarking data indicates significant performance improvement over CPU execution.
 
 ## Future Plans
