@@ -75,7 +75,6 @@ void runMapReduce(input_type *input, output_type *output) {
     // 将输入数据复制到 GPU
     cudaMemcpy(dev_input, input, input_size, cudaMemcpyHostToDevice);
 
-
     // 运行 map 内核
     cudaMap(dev_input, dev_pairs);
 
