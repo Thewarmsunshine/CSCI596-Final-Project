@@ -7,82 +7,64 @@
 
 using namespace std;
 
-/*
- * Mapping function to be run for each input. The input must be read from memory
- * and the the key/value output must be stored in memory at pairs. Multiple
- * pairs may be stored at the next postiion in pairs, but the maximum number of
- * key/value pairs stored must not exceed NUM_KEYS.
- */
-__device__ void mapper(input_type *input, KeyValuePair *pairs) {
-    // We set the key of each input to 0.
-    pairs->key = 0;
-    float x = input->x;
-    float y = input->y;
-    // We check if the input point fits within the unit circle, and set the
-    // value accordingly
-    if (x * x + y * y <= 1) {
-        pairs->value = 1;
-    } else {
-        pairs->value = 0;
-    }
+// 简单的伪随机数生成器函数
+__device__ unsigned int simpleRand(unsigned int seed) {
+    seed ^= seed << 13;
+    seed ^= seed >> 17;
+    seed ^= seed << 5;
+    return seed;
 }
 
-/*
- * Reducing function to be run for each set of key/value pairs that share the
- * same key. len key/value pairs may be read from memory, and the output
- * generated from these pairs must be stored at output in memory.
- */
-__device__ void reducer(KeyValuePair *pairs, int len, output_type *output) {
-    //int key = pairs->key;
-    // We calculate the proportion of the points within the unit circle
-    int pointsIn = 0;
-    for (KeyValuePair *pair = pairs; pair != pairs + len; pair++) {
-        if(pair->value == 1) {
-            pointsIn++;
+// mapper 函数: 为每个输入元素生成一个骰子面 (1到6)
+__device__ void mapper(input_type *input, Pair *pairs) {
+    // We set the key of each input to 0.
+    unsigned int seed = threadIdx.x + blockIdx.x * blockDim.x;
+    seed = simpleRand(seed);  // 使用简单的伪随机数生成器
+    pairs->value = (seed % 6) + 1;  // 生成 1 到 6 之间的随机数
+
+}
+
+// reducer 函数: 统计每个骰子面出现的次数，并计算概率
+__device__ void reducer(Pair *pairs, int len, output_type *output) {
+    int counts[6] = {0};  // 用于统计每个面出现的次数
+    for (int i = 0; i < len; i++) {
+        int face = static_cast<int>(pairs[i].value);
+        if (face >= 1 && face <= 6) {
+            counts[face - 1]++;
         }
     }
-    // We multiply the proportion by 4, since our points are in only the quarter
-    // circle, so by geometry, the value of pi is 4 times the number of points
-    // in the unit circle out of the unit square
-    *output = 4.0 * (float(pointsIn)/float(len));
+	for (int i = 0; i < 6; i++) {
+        output[i] = static_cast<float>(counts[i]) / len;  // 计算每个面的概率
+    }
 }
 
-/*
- * Generate a random float between 0 and 1 inclusive.
- */
-float randFloat() {
-    return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-}
-
-/*
- * Main function that runs a map reduce job.
- */
+// 主函数: 运行 MapReduce 作业并输出结果
 int main(int argc, char const *argv[]) {
-    // Seed the random function for random number generation
-    srand (time(NULL));
+    clock_t start, end;
+    double cpu_time_used;
 
-    // Allocate host memory
+    start = clock(); // 开始计时
+    
+    // 分配内存
     size_t input_size = NUM_INPUT * sizeof(input_type);
     size_t output_size = NUM_OUTPUT * sizeof(output_type);
-    input_type *input = (input_type *) malloc(input_size);
-    output_type *output = (output_type *) malloc(output_size);
+    input_type *input = (input_type *)malloc(input_size);
+    output_type *output = (output_type *)malloc(output_size);
 
-    // Populate the input array with random coordinates
-    printf("Generating %d Test Points\n", NUM_INPUT);
-    for (size_t i = 0; i < NUM_INPUT; i++) {
-        input[i].x = randFloat();
-        input[i].y = randFloat();
-    }
-
-    // Run the Map Reduce Job
+    // 运行 MapReduce 作业
     runMapReduce(input, output);
 
-    // Iterate through the output array
-    for (size_t i = 0; i < NUM_OUTPUT; i++) {
-        printf("Value of Pi: %f\n", output[i]);
+    // 输出所有面的概率
+    for (int i = 0; i < NUM_OUTPUT; i++) {
+        printf("Probability of Face %d: %f%\n", i + 1, output[i] * 100);
     }
 
-    // Free host memory
+    end = clock(); // 结束计时
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC; // 计算运行时间
+
+    printf("Time taken: %f seconds\n", cpu_time_used); // 打印运行时间
+
+    // 释放内存
     free(input);
     free(output);
 
