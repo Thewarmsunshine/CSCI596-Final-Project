@@ -39,16 +39,16 @@ else
       NVCCFLAGS := -m64
 endif
 
-TARGETS = gpu_demo
+TARGETS = DiceProbability-GPU
 
 all: $(TARGETS)
 
-#gpu_demo: map_reduce.cu gpu_demo.o ta_utilities.o
+#DiceProbability-GPU: map_reduce.cu DiceProbability-GPU.o ta_utilities.o
 #	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ $^
 
-gpu_demo: gpu_demo.cu map_reduce.cu
+DiceProbability-GPU: DiceProbability-GPU.cu map_reduce.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) --device-c $^
-	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ gpu_demo.o map_reduce.o
+	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ DiceProbability-GPU.o map_reduce.o
 
 clean:
 	rm -f *.o $(TARGETS)
@@ -56,4 +56,4 @@ clean:
 again: clean $(TARGETS)
 
 run: $(TARGETS)
-	./gpu_demo
+	./DiceProbability-GPU
